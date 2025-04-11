@@ -40,15 +40,17 @@ class Classroom:
     def __repr__(self):
         return f"Classroom {self.name}"
 
-# napraviti podjelu na predavaonice i labose?
+# napraviti podjelu na predavaonice i labose?-
 classrooms = [
     Classroom('108'),
     Classroom('109'),
     Classroom('110')
 ]
-#podjela na predavanja i vjezbe?
+#podjela na predavanja i vjezbe?-
 subjects = [Subject('Robotika'), Subject('NMDU'), Subject('ModSim'), Subject('APOI')]
 
+#napraviti suprotno - kada profesor nije slobodan - ako je moguće - ne moraju biti ispunjene
+#svi profesori nisu dostupni u jednom terminu
 professors = [
     Professor('Dr. Smith', ['Mon 8-10'], [subjects[0]]),
     Professor('Dr. Johnson', ['Mon 8-10'], [subjects[1]]),
@@ -129,11 +131,10 @@ def greedy_schedule(professors, classrooms, timetable):
                 if not scheduled_for_this_slot:
                     print(f"{subject.name} could not be scheduled for {professor.name}.")
                     
-#Napraviti optimizaciju tako da ne postoje preklapanja među godinama? oce rec izborni kolegiji koje slusaju 1. i 2. godina npr.
-#Da sto vise predavanja bude u pocetku tjedna? ujutro?
-#Smanjiti broj predavanja u danu?
-#Da se sto vise predavanja stavi u istu predavaonu?
-#Ako se radi podjela predavanja/vjezbe - staviti da prvo idu predavanja pa vjezbe (vjezbe prate predavanja?)
+#Napraviti optimizaciju tako da ne postoje preklapanja među godinama? oce rec izborni kolegiji koje slusaju 1. i 2. godina npr. -
+#Da sto vise predavanja bude u pocetku tjedna? ujutro? -
+#Smanjiti broj predavanja u danu? -
+#Ako se radi podjela predavanja/vjezbe - staviti da prvo idu predavanja pa vjezbe (vjezbe prate predavanja?)-
 
 def hill_climb(timetable, classrooms, professors):
     current_cost = calculate_cost(timetable)
