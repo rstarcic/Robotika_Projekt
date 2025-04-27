@@ -70,7 +70,11 @@ professors = [
         ["Mon 8-10", "Tue 14-16", "Wed 14-16"],
         [subjects[0], subjects[1]],
     ),
-    Professor("Dr. Lee", ["Mon 8-10"], [subjects[2]]),
+    Professor(
+        "Dr. Lee",
+        ["Mon 8-10", "Mon 10-12", "Wed 14-16", "Wed 10-12", "Tue 8-10", "Fri 10-12"],
+        [subjects[2]],
+    ),
     Professor(
         "Dr. Brown",
         ["Mon 8-10", "Mon 10-12"],
@@ -90,12 +94,18 @@ timetable = {
 }
 
 
+def sort_key(slot):
+    day_order = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4}
+    day_abbr, time_range = slot.split()
+    start_hour = int(time_range.split("-")[0])
+    return (day_order[day_abbr], start_hour)
+
+
 def greedy_schedule(professors, classrooms, timetable):
     for phase in ["Predavanje", "Vježbe"]:
         for professor in professors:
 
-            available_slots = sorted(professor.available_times, key=lambda x: x)
-
+            available_slots = sorted(professor.available_times, key=sort_key)
             for slot in available_slots:
                 day, time_slot = slot.split(" ")
 
