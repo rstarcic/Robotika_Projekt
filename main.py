@@ -61,10 +61,18 @@ subjects = [
     Subject("ModSim - Vježbe"),
     Subject("APOI - Predavanje"),
     Subject("APOI - Vježbe"),
+    Subject("IT management - Predavanje"),
+    Subject("IT management - Vježbe"),
 ]
 
 
 professors = [
+    Professor(
+        "Dr. Etinger",
+        ["Thu 8-10", "Fri 8-10"],
+        [subjects[8]],
+    ),
+    Professor("Dr. Sajina", ["Tue 8-10", "Fri 10-12"], [subjects[9]]),
     Professor(
         "Dr. Johnson",
         ["Mon 8-10", "Tue 14-16", "Wed 14-16"],
@@ -72,7 +80,7 @@ professors = [
     ),
     Professor(
         "Dr. Lee",
-        ["Mon 8-10", "Mon 10-12", "Wed 14-16", "Wed 10-12", "Tue 8-10", "Fri 10-12"],
+        ["Tue 8-10", "Tue 10-12", "Wed 14-16", "Wed 10-12", "Tue 8-10", "Fri 10-12"],
         [subjects[2]],
     ),
     Professor(
@@ -80,9 +88,8 @@ professors = [
         ["Mon 8-10", "Mon 10-12"],
         [subjects[4], subjects[5]],
     ),
-    # Professor("Dr. White", ["Thu 8-10"], [subjects[1]]),
-    Professor("Dr. McCalister", ["Wed 8-10"], [subjects[3]]),
-    # Professor("Dr. Taylor",["Thu 8-10", "Fri 10-12"],[subjects_vjezbe[0], subjects_vjezbe[3]],),
+    Professor("Dr. White", ["Thu 8-10"], [subjects[1]]),
+    Professor("Dr. McCalister", ["Tue 8-10"], [subjects[3]]),
 ]
 
 days = ["Mon", "Tue", "Wed", "Thu", "Fri"]
@@ -102,222 +109,302 @@ def sort_key(slot):
 
 
 def greedy_schedule(professors, classrooms, timetable):
-    for phase in ["Predavanje", "Vježbe"]:
-        for professor in professors:
+    used_time_slots = set()
+    for professor in professors:
 
-            available_slots = sorted(professor.available_times, key=sort_key)
-            for slot in available_slots:
-                day, time_slot = slot.split(" ")
+        available_slots = sorted(professor.available_times, key=sort_key)
+        for slot in available_slots:
+            day, time_slot = slot.split(" ")
 
-                for subject in professor.subjects:
-                    if subject.scheduled:
-                        continue
-                    if not professor.is_available(slot):
-                        continue
+            if (day, time_slot) in used_time_slots:
+                continue
+            for subject in professor.subjects:
+                if subject.scheduled:
+                    continue
+                if not professor.is_available(slot):
+                    continue
 
-                    scheduled_for_this_slot = False
+                scheduled_for_this_slot = False
 
-                    for classroom in classrooms:
+                for classroom in classrooms:
+                    if classroom.is_available(day, time_slot):
                         if classroom.is_available(day, time_slot):
-                            if classroom.is_available(day, time_slot):
-                                if "Vježbe" in subject.name and not classroom.is_lab:
-                                    continue
-                                if not "Vježbe" in subject.name and classroom.is_lab:
-                                    continue
+                            if "Vježbe" in subject.name and not classroom.is_lab:
+                                continue
+                            if not "Vježbe" in subject.name and classroom.is_lab:
+                                continue
 
-                            timetable[classroom.name][day][time_slot] = {
-                                "professor": professor.name,
-                                "classroom": classroom.name,
-                                "subject": subject.name,
-                            }
-                            classroom.schedule_lecture(
-                                professor, day, time_slot, subject
-                            )
-                            professor.schedule_lecture(slot)
-                            subject.scheduled = True
+                        timetable[classroom.name][day][time_slot] = {
+                            "professor": professor.name,
+                            "classroom": classroom.name,
+                            "subject": subject.name,
+                        }
+                        classroom.schedule_lecture(professor, day, time_slot, subject)
+                        professor.schedule_lecture(slot)
+                        subject.scheduled = True
+                        used_time_slots.add((day, time_slot))
+                        print(
+                            f"Scheduled {subject.name} with {professor.name} in {classroom.name} on {slot}"
+                        )
+                        scheduled_for_this_slot = True
+                        break
+                if not scheduled_for_this_slot:
+                    print(
+                        f"No classroom available for {subject.name} at {day} {time_slot}. Trying next available time slot."
+                    )
+
+                    for next_slot in available_slots:
+                        if next_slot > slot:
+                            next_day, next_time_slot = next_slot.split(" ")
                             print(
-                                f"Scheduled {subject.name} with {professor.name} in {classroom.name} on {slot}"
+                                f"Trying to schedule {subject.name} for {professor.name} at {next_day} {next_time_slot}"
                             )
-                            scheduled_for_this_slot = True
-                            break
-                    if not scheduled_for_this_slot:
-                        print(
-                            f"No classroom available for {subject.name} at {day} {time_slot}. Trying next available time slot."
-                        )
 
-                        for next_slot in available_slots:
-                            if next_slot > slot:
-                                next_day, next_time_slot = next_slot.split(" ")
-                                print(
-                                    f"Trying to schedule {subject.name} for {professor.name} at {next_day} {next_time_slot}"
-                                )
+                            for classroom in classrooms:
+                                if classroom.is_available(next_day, next_time_slot):
+                                    conflict_found = False
 
-                                for classroom in classrooms:
-                                    if classroom.is_available(next_day, next_time_slot):
-                                        conflict_found = False
-
-                                        for other_day in days:
-                                            for other_time_slot in time_slots:
-                                                if timetable[classroom.name][other_day][
+                                    for other_day in days:
+                                        for other_time_slot in time_slots:
+                                            if timetable[classroom.name][other_day][
+                                                other_time_slot
+                                            ]:
+                                                other_lecture = timetable[other_day][
                                                     other_time_slot
-                                                ]:
-                                                    other_lecture = timetable[
-                                                        other_day
-                                                    ][other_time_slot]
-                                                    if (
-                                                        other_lecture["classroom"]
-                                                        == classroom.name
-                                                        and other_lecture["professor"]
-                                                        != professor.name
-                                                    ):
-                                                        conflict_found = True
-                                                        break
+                                                ]
+                                                if (
+                                                    other_lecture["classroom"]
+                                                    == classroom.name
+                                                    and other_lecture["professor"]
+                                                    != professor.name
+                                                ):
+                                                    conflict_found = True
+                                                    break
 
-                                                    if (
-                                                        other_lecture["subject"]
-                                                        == subject.name
-                                                    ):
-                                                        conflict_found = True
-                                                        break
-                                            if conflict_found:
-                                                break
-
-                                        if not conflict_found:
-                                            timetable[classroom.name][next_day][
-                                                next_time_slot
-                                            ] = {
-                                                "professor": professor.name,
-                                                "classroom": classroom.name,
-                                                "subject": subject.name,
-                                            }
-                                            classroom.schedule_lecture(
-                                                professor,
-                                                next_day,
-                                                next_time_slot,
-                                                subject,
-                                            )
-                                            professor.schedule_lecture(next_slot)
-                                            subject.scheduled = True
-                                            print(
-                                                f"Scheduled {subject.name} with {professor.name} in {classroom.name} on {next_slot}"
-                                            )
-                                            scheduled_for_this_slot = True
+                                                if (
+                                                    other_lecture["subject"]
+                                                    == subject.name
+                                                ):
+                                                    conflict_found = True
+                                                    break
+                                        if conflict_found:
                                             break
-                                if scheduled_for_this_slot:
-                                    break
-                    if not scheduled_for_this_slot:
-                        print(
-                            f"{subject.name} could not be scheduled for {professor.name}."
-                        )
+
+                                    if not conflict_found:
+                                        timetable[classroom.name][next_day][
+                                            next_time_slot
+                                        ] = {
+                                            "professor": professor.name,
+                                            "classroom": classroom.name,
+                                            "subject": subject.name,
+                                        }
+                                        classroom.schedule_lecture(
+                                            professor,
+                                            next_day,
+                                            next_time_slot,
+                                            subject,
+                                        )
+                                        professor.schedule_lecture(next_slot)
+                                        subject.scheduled = True
+                                        used_time_slots.add((day, time_slot))
+                                        print(
+                                            f"Scheduled {subject.name} with {professor.name} in {classroom.name} on {next_slot}"
+                                        )
+                                        scheduled_for_this_slot = True
+                                        break
+                            if scheduled_for_this_slot:
+                                break
+                if not scheduled_for_this_slot:
+                    print(
+                        f"{subject.name} could not be scheduled for {professor.name}."
+                    )
 
 
 # Napraviti optimizaciju tako da ne postoje preklapanja među godinama? oce rec izborni kolegiji koje slusaju 1. i 2. godina npr.
 # Da sto vise predavanja bude u pocetku tjedna? ujutro?
 # Smanjiti broj predavanja u danu?
 # Da se sto vise predavanja stavi u istu predavaonu?
-# Ako se radi podjela predavanja/vjezbe - staviti da prvo idu predavanja pa vjezbe (vjezbe prate predavanja?)
+# Ako se radi podjela predavanja/vjezbe - staviti da prvo idu predavanja pa vjezbe (vjezbe prate predavanja?) done
+def score_timetable(timetable, classrooms, professors):
+    score = 0
+    penalties = 0
 
+    subject_slots = {}
 
-def hill_climb(timetable, classrooms, professors):
-    current_cost = calculate_cost(timetable)
-    print(f"Initial Cost: {current_cost}")
+    for classroom in classrooms:
+        for (day, time_slot), (professor, subject) in classroom.schedule.items():
+            if professor and subject:
+                subject_slots[subject.name] = (day, time_slot, professor)
 
-    improved = True
-    while improved:
-        improved = False
-        best_timetable = {day: dict(time_slot) for day, time_slot in timetable.items()}
+    for subject_name, (day, slot, professor) in subject_slots.items():
+        slot_str = f"{day} {slot}"
 
-        best_cost = current_cost
+        if slot_str not in professor.available_times:
+            penalties += 15
 
-        for professor1 in professors:
-            for professor2 in professors:
-                if professor1 == professor2:
+    for subject in subject_slots:
+        if "Vježbe" in subject:
+            lecture_name = subject.replace("Vježbe", "Predavanje").strip()
+            if lecture_name in subject_slots:
+                lec_day, lec_slot, _ = subject_slots[lecture_name]
+                ex_day, ex_slot, ex_prof = subject_slots[subject]
+
+                if ex_prof is None:
                     continue
 
-                for day1 in days:
-                    for time_slot1 in time_slots:
-                        for day2 in days:
-                            for time_slot2 in time_slots:
-                                for classroom in classrooms:
-                                    if (
-                                        timetable[classroom.name][day1][time_slot1]
-                                        and timetable[classroom.name][day2][time_slot2]
-                                    ):
-                                        lecture1 = timetable[classroom.name][day1][
-                                            time_slot1
-                                        ]
-                                        lecture2 = timetable[classroom.name][day2][
-                                            time_slot2
-                                        ]
+                lec_index = (days.index(lec_day), time_slots.index(lec_slot))
+                ex_index = (days.index(ex_day), time_slots.index(ex_slot))
 
-                                        if lecture1["subject"] == lecture2["subject"]:
-                                            continue
+                if ex_index > lec_index:
+                    score += 10
+                else:
+                    penalties += 10
 
-                                        if professor1.is_available(
-                                            time_slot2
-                                        ) and professor2.is_available(time_slot1):
-                                            swap_lectures(
-                                                timetable,
-                                                professor1,
-                                                professor2,
-                                                day1,
-                                                time_slot1,
-                                                day2,
-                                                time_slot2,
-                                            )
-                                            new_cost = calculate_cost(timetable)
+                for prof in professors:
+                    if (
+                        prof.name == ex_prof.name
+                        and f"{ex_day} {ex_slot}" not in prof.available_times
+                    ):
+                        penalties += 5
+    return score - penalties
 
-                                            if new_cost < best_cost:
-                                                best_timetable = {
-                                                    day: dict(time_slot)
-                                                    for day, time_slot in timetable.items()
-                                                }
-                                                best_cost = new_cost
-                                                improved = True
-                                                print(f"Improved Cost: {best_cost}")
 
-                                            swap_lectures(
-                                                timetable,
-                                                professor1,
-                                                professor2,
-                                                day1,
-                                                time_slot1,
-                                                day2,
-                                                time_slot2,
-                                                undo=True,
-                                            )
+def clone_classrooms(classrooms):
+    cloned = []
+    for c in classrooms:
+        new_classroom = Classroom(c.name, c.is_lab)
+        new_classroom.schedule = {
+            (day, time_slot): (
+                Professor(p.name, p.available_times[:], p.subjects),
+                subj,
+            )
+            for (day, time_slot), (p, subj) in c.schedule.items()
+        }
+        cloned.append(new_classroom)
+    return cloned
 
-        timetable = best_timetable
-        current_cost = best_cost
 
-    print(f"Optimized Cost: {current_cost}")
+def clone_timetable(classrooms):
+    timetable = {
+        c.name: {day: {slot: None for slot in time_slots} for day in days}
+        for c in classrooms
+    }
+    for c in classrooms:
+        for (day, slot), val in c.schedule.items():
+            if val is None:
+                continue
+            prof, subj = val
+            if prof is None or subj is None:
+                continue
+            timetable[c.name][day][slot] = {
+                "professor": prof.name,
+                "classroom": c.name,
+                "subject": subj.name,
+            }
     return timetable
 
 
-def calculate_cost(timetable):
-    unassigned_lectures = 0
+def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
+    current_classrooms = clone_classrooms(classrooms)
+    current_timetable = clone_timetable(current_classrooms)
+    current_score = score_timetable(current_timetable, current_classrooms, professors)
+    print("Original timetable score:", current_score)
 
-    for classroom in classrooms:
-        for day in days:
-            for time_slot in time_slots:
-                if not timetable[classroom.name][day][time_slot]:
-                    unassigned_lectures += 1
+    for _ in range(max_iterations):
+        improved = False
+        best_score = current_score
+        best_classrooms = clone_classrooms(current_classrooms)
 
-    return unassigned_lectures
+        for subject in [
+            s for p in professors for s in p.subjects if "Vježbe" in s.name
+        ]:
+            lec_name = subject.name.replace("Vježbe", "Predavanje").strip()
 
+            lec_time = None
+            for c in current_classrooms:
+                for (day, slot), (p, s) in c.schedule.items():
+                    if s.name == lec_name:
+                        lec_time = (day, slot)
+                        break
+                if lec_time:
+                    break
 
-def swap_lectures(
-    timetable, professor1, professor2, day1, time_slot1, day2, time_slot2, undo=False
-):
-    lecture1 = timetable[day1][time_slot1]
-    lecture2 = timetable[day2][time_slot2]
+            if not lec_time:
+                continue
 
-    if undo:
-        timetable[day1][time_slot1] = lecture1
-        timetable[day2][time_slot2] = lecture2
-    else:
-        timetable[day1][time_slot1] = lecture2
-        timetable[day2][time_slot2] = lecture1
+            lec_day_i = days.index(lec_time[0])
+            lec_slot_i = time_slots.index(lec_time[1])
+            ex_day, ex_slot, ex_prof, old_classroom = None, None, None, None
+
+            for c in current_classrooms:
+                for (d, s), (p, subj) in list(c.schedule.items()):
+                    if subj.name == subject.name:
+                        ex_day, ex_slot = d, s
+                        ex_prof = p
+                        old_classroom = c
+                        del c.schedule[(d, s)]
+                        break
+                if ex_day:
+                    break
+
+            professor = ex_prof
+            if professor is None:
+                continue
+
+            slot_moved = False
+            for day_i in range(lec_day_i, len(days)):
+                for slot_i in range(len(time_slots)):
+                    if day_i == lec_day_i and slot_i <= lec_slot_i:
+                        continue
+
+                    new_day = days[day_i]
+                    new_slot = time_slots[slot_i]
+                    new_slot_str = f"{new_day} {new_slot}"
+
+                    for classroom in current_classrooms:
+
+                        if not classroom.is_lab or not classroom.is_available(
+                            new_day, new_slot
+                        ):
+                            continue
+
+                        classroom.schedule[(new_day, new_slot)] = (professor, subject)
+
+                        new_timetable = clone_timetable(current_classrooms)
+                        new_score = score_timetable(
+                            new_timetable, current_classrooms, professors
+                        )
+
+                        if new_score > best_score:
+                            for bc in best_classrooms:
+                                if (ex_day, ex_slot) in bc.schedule:
+                                    p, s = bc.schedule[(ex_day, ex_slot)]
+                                    if s.name == subject.name:
+                                        del bc.schedule[(ex_day, ex_slot)]
+                                        break
+
+                            best_score = new_score
+                            best_classrooms = clone_classrooms(current_classrooms)
+                            improved = True
+                        else:
+                            del classroom.schedule[(new_day, new_slot)]
+                    if slot_moved:
+                        break
+                if slot_moved:
+                    break
+
+            if not slot_moved and ex_day:
+                old_classroom.schedule[(ex_day, ex_slot)] = (professor, subject)
+
+        if not improved:
+            break
+
+        current_classrooms = best_classrooms
+        current_timetable = clone_timetable(current_classrooms)
+        current_score = best_score
+    print("New cost:", current_score)
+
+    return current_timetable
 
 
 def display_timetable(timetable, classrooms):
@@ -383,7 +470,6 @@ def generate_html_single_table(timetable, classrooms):
                     subject = lecture["subject"]
                     professor = lecture["professor"]
                     classroom_name = classroom.name
-                    # Složimo tekst za jednu učionicu
                     cell_content += f"<strong>{classroom_name}</strong><br>{professor}<br>{subject}<br><br>"
 
             if cell_content == "":
@@ -401,9 +487,19 @@ def generate_html_single_table(timetable, classrooms):
     return html
 
 
-html_content = generate_html_single_table(timetable, classrooms)
+html_content_timetable = generate_html_single_table(timetable, classrooms)
 
 with open("timetable.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
+    f.write(html_content_timetable)
 
 print("HTML file generated: timetable.html")
+
+
+html_content_optimized_timetable = generate_html_single_table(
+    optimized_timetable, classrooms
+)
+
+with open("optimized_timetable.html", "w", encoding="utf-8") as f:
+    f.write(html_content_optimized_timetable)
+
+print("HTML file generated: optimized_timetable.html")
