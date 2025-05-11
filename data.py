@@ -24,9 +24,9 @@ professors = [
     Professor(
         "Dr. Etinger",
         ["Thu 8-10", "Fri 8-10"],
-        [subjects[8]],
+        [subjects[8], subjects[9]],
     ),
-    Professor("Dr. Sajina", ["Tue 8-10", "Fri 10-12"], [subjects[9]]),
+    # Professor("Dr. Sajina", ["Tue 8-10", "Fri 10-12"], [subjects[9]]),
     Professor(
         "Dr. Johnson",
         ["Mon 8-10", "Tue 14-16", "Wed 14-16"],
@@ -42,8 +42,8 @@ professors = [
         ["Mon 8-10", "Mon 10-12"],
         [subjects[4], subjects[5]],
     ),
-    Professor("Dr. White", ["Thu 8-10"], [subjects[1]]),
-    Professor("Dr. McCalister", ["Tue 8-10"], [subjects[3]]),
+    Professor("Dr. White", ["Thu 8-10"], [subjects[6]]),
+    Professor("Dr. McCalister", ["Tue 8-10"], [subjects[3], subjects[7]]),
 ]
 
 days = ["Mon", "Tue", "Wed", "Thu", "Fri"]

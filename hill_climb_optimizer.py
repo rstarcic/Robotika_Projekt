@@ -150,6 +150,22 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
                         ):
                             continue
 
+                            # Check for global time conflict for the same professor
+                        professor_busy_elsewhere = any(
+                            (new_day, new_slot) in c.schedule
+                            and c.schedule[(new_day, new_slot)][0].name
+                            == professor.name
+                            for c in current_classrooms
+                        )
+                        if professor_busy_elsewhere:
+                            continue
+                        time_slot_occupied = any(
+                            (new_day, new_slot) in c.schedule
+                            for c in current_classrooms
+                        )
+                        if time_slot_occupied:
+                            continue
+
                         classroom.schedule[(new_day, new_slot)] = (professor, subject)
 
                         new_timetable = clone_timetable(current_classrooms)
