@@ -24,32 +24,38 @@ professors = [
     Professor(
         "Dr. Etinger",
         ["Thu 8-10", "Fri 8-10"],
-        [subjects[8], subjects[9]],
+        {1:[subjects[8],subjects[9]]},
     ),
     # Professor("Dr. Sajina", ["Tue 8-10", "Fri 10-12"], [subjects[9]]),
     Professor(
         "Dr. Johnson",
         ["Mon 8-10", "Tue 14-16", "Wed 14-16"],
-        [subjects[0], subjects[1]],
+        {1:[subjects[0], subjects[1]]},
     ),
     Professor(
         "Dr. Lee",
         ["Tue 8-10", "Tue 10-12", "Wed 14-16", "Wed 10-12", "Tue 8-10", "Fri 10-12"],
-        [subjects[2]],
+        {1:[subjects[2]]},
     ),
     Professor(
         "Dr. Brown",
         ["Mon 8-10", "Mon 10-12"],
-        [subjects[4], subjects[5]],
+        {2:[subjects[4], subjects[5]]},
     ),
-    Professor("Dr. White", ["Thu 8-10"], [subjects[6]]),
-    Professor("Dr. McCalister", ["Tue 8-10"], [subjects[3], subjects[7]]),
+    Professor("Dr. White", ["Thu 8-10"], {2:[subjects[6]]}),
+    Professor("Dr. McCalister", ["Tue 8-10"], {1:[subjects[3]], 2:[subjects[7]]}),
 ]
 
 days = ["Mon", "Tue", "Wed", "Thu", "Fri"]
 time_slots = ["8-10", "10-12", "14-16", "16-18", "18-20"]
 
-timetable = {
+timetable_1 = {
+    classroom.name: {day: {time_slot: None for time_slot in time_slots} for day in days}
+    for classroom in classrooms
+}
+
+
+timetable_2 = {
     classroom.name: {day: {time_slot: None for time_slot in time_slots} for day in days}
     for classroom in classrooms
 }

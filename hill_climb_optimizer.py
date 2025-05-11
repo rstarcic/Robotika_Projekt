@@ -194,12 +194,21 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
             if not slot_moved and ex_day:
                 old_classroom.schedule[(ex_day, ex_slot)] = (professor, subject)
 
-        if not improved:
-            break
-
         current_classrooms = best_classrooms
         current_timetable = clone_timetable(current_classrooms)
         current_score = best_score
+        
+        for c in current_classrooms:
+            for lect in list(c.schedule.items()):
+                this_year=False
+                for professor in professors:
+                    if lect[1][1] in professor.subjects:
+                        this_year=True
+                if not this_year and lect[0] in c.schedule.keys():
+                    print("brisem", lect)
+                    del c.schedule[lect[0]]
+                
+        current_timetable=clone_timetable(current_classrooms)
     print("New cost:", current_score)
 
     return current_timetable
