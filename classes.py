@@ -1,8 +1,11 @@
 class Subject:
-    def __init__(self, name):
+
+    def __init__(self, name, subject_type, year, is_elective=False):
         self.name = name
         self.scheduled = False
-        # self.year = year
+        self.type = subject_type
+        self.year = year
+        self.is_elective = is_elective
 
     def __repr__(self):
         return self.name

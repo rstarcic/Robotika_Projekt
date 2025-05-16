@@ -16,38 +16,34 @@ def score_timetable(timetable, classrooms, professors):
     for classroom in classrooms:
         for (day, time_slot), (professor, subject) in classroom.schedule.items():
             if professor and subject:
-                subject_slots[subject.name] = (day, time_slot, professor)
+                key = (subject.name, subject.type)
+                subject_slots[key] = (day, time_slot, professor, subject)
 
-    for subject_name, (day, slot, professor) in subject_slots.items():
+    for (name, type_), (day, slot, professor, subject) in subject_slots.items():
         slot_str = f"{day} {slot}"
 
         if slot_str not in professor.available_times:
             penalties += 15
 
-    for subject in subject_slots:
-        if "Vježbe" in subject:
-            lecture_name = subject.replace("Vježbe", "Predavanje").strip()
-            if lecture_name in subject_slots:
-                lec_day, lec_slot, _ = subject_slots[lecture_name]
-                ex_day, ex_slot, ex_prof = subject_slots[subject]
-
-                if ex_prof is None:
-                    continue
+    for (name, type_), (ex_day, ex_slot, ex_prof, ex_subject) in subject_slots.items():
+        if ex_subject.type == "Vježbe":
+            lecture_key = (ex_subject.name, "Predavanje")
+            if lecture_key in subject_slots:
+                lec_day, lec_slot, lec_prof, lec_subject = subject_slots[lecture_key]
 
                 lec_index = (days.index(lec_day), time_slots.index(lec_slot))
                 ex_index = (days.index(ex_day), time_slots.index(ex_slot))
 
                 if ex_index > lec_index:
-                    score += 10
+                    score += 10  # Reward: vježbe come after predavanje
                 else:
-                    penalties += 10
+                    penalties += 15  # Penalty: bad order
 
-                for prof in professors:
-                    if (
-                        prof.name == ex_prof.name
-                        and f"{ex_day} {ex_slot}" not in prof.available_times
-                    ):
-                        penalties += 5
+                # Extra penalty if professor not available for vježbe
+                ex_slot_str = f"{ex_day} {ex_slot}"
+                if ex_slot_str not in ex_prof.available_times:
+                    penalties += 5
+
     return score - penalties
 
 
@@ -57,8 +53,8 @@ def clone_classrooms(classrooms):
         new_classroom = Classroom(c.name, c.is_lab)
         new_classroom.schedule = {
             (day, time_slot): (
-                Professor(p.name, p.available_times[:], p.subjects),
-                subj,
+                Professor(p.name, p.available_times[:], list(p.subjects)),
+                subj,  # defintitvno debugirati
             )
             for (day, time_slot), (p, subj) in c.schedule.items()
         }
@@ -82,6 +78,7 @@ def clone_timetable(classrooms):
                 "professor": prof.name,
                 "classroom": c.name,
                 "subject": subj.name,
+                "subject_type": subj.type,
             }
     return timetable
 
@@ -98,14 +95,13 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
         best_classrooms = clone_classrooms(current_classrooms)
 
         for subject in [
-            s for p in professors for s in p.subjects if "Vježbe" in s.name
+            s for p in professors for s in p.subjects if s.type == "Vježbe"
         ]:
-            lec_name = subject.name.replace("Vježbe", "Predavanje").strip()
 
             lec_time = None
             for c in current_classrooms:
                 for (day, slot), (p, s) in c.schedule.items():
-                    if s.name == lec_name:
+                    if s.name == subject.name and s.type == "Predavanje":
                         lec_time = (day, slot)
                         break
                 if lec_time:
@@ -120,7 +116,7 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
 
             for c in current_classrooms:
                 for (d, s), (p, subj) in list(c.schedule.items()):
-                    if subj.name == subject.name:
+                    if subj.name == subject.name and subj.type == "Vježbe":
                         ex_day, ex_slot = d, s
                         ex_prof = p
                         old_classroom = c
@@ -150,7 +146,6 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
                         ):
                             continue
 
-                            # Check for global time conflict for the same professor
                         professor_busy_elsewhere = any(
                             (new_day, new_slot) in c.schedule
                             and c.schedule[(new_day, new_slot)][0].name
@@ -177,13 +172,14 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
                             for bc in best_classrooms:
                                 if (ex_day, ex_slot) in bc.schedule:
                                     p, s = bc.schedule[(ex_day, ex_slot)]
-                                    if s.name == subject.name:
+                                    if s.name == subject.name and s.type == "Vježbe":
                                         del bc.schedule[(ex_day, ex_slot)]
                                         break
 
                             best_score = new_score
                             best_classrooms = clone_classrooms(current_classrooms)
                             improved = True
+                            slot_moved = True
                         else:
                             del classroom.schedule[(new_day, new_slot)]
                     if slot_moved:
@@ -197,18 +193,18 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
         current_classrooms = best_classrooms
         current_timetable = clone_timetable(current_classrooms)
         current_score = best_score
-        
+
         for c in current_classrooms:
             for lect in list(c.schedule.items()):
-                this_year=False
+                this_year = False
                 for professor in professors:
                     if lect[1][1] in professor.subjects:
-                        this_year=True
+                        this_year = True
                 if not this_year and lect[0] in c.schedule.keys():
                     print("brisem", lect)
                     del c.schedule[lect[0]]
-                
-        current_timetable=clone_timetable(current_classrooms)
+
+        current_timetable = clone_timetable(current_classrooms)
     print("New cost:", current_score)
 
     return current_timetable

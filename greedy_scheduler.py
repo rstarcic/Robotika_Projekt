@@ -30,17 +30,20 @@ def greedy_schedule(professors, classrooms, timetable):
 
                 for classroom in classrooms:
                     if classroom.is_available(day, time_slot):
-                        if "Vježbe" in subject.name and not classroom.is_lab:
+                        if subject.type == "Vježbe" and not classroom.is_lab:
                             continue
-                        if "Predavanje" in subject.name and classroom.is_lab:
+                        if subject.type == "Predavanje" and classroom.is_lab:
                             continue
 
                         timetable[classroom.name][day][time_slot] = {
                             "professor": professor.name,
                             "classroom": classroom.name,
                             "subject": subject.name,
+                            "subject_type": subject.type,
                         }
-                        classroom.schedule_lecture(professor, day, time_slot, subject)
+                        classroom.schedule_lecture(
+                            professor, day, time_slot, subject
+                        )  # treba debugirati
                         professor.schedule_lecture(slot)
                         subject.scheduled = True
                         used_time_slots.add((day, time_slot))
@@ -67,15 +70,16 @@ def greedy_schedule(professors, classrooms, timetable):
                         for classroom in classrooms:
                             if not classroom.is_available(day, time_slot):
                                 continue
-                            if "Vježbe" in subject.name and not classroom.is_lab:
+                            if subject.type == "Vježbe" and not classroom.is_lab:
                                 continue
-                            if "Predavanje" in subject.name and classroom.is_lab:
+                            if subject.type == "Predavanje" and classroom.is_lab:
                                 continue
 
                             timetable[classroom.name][day][time_slot] = {
                                 "professor": professor.name,
                                 "classroom": classroom.name,
                                 "subject": subject.name,
+                                "subject_type": subject.type,
                             }
                             classroom.schedule_lecture(
                                 professor, day, time_slot, subject
