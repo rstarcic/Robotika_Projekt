@@ -8,8 +8,13 @@ def sort_key(slot):
     return (day_order[day_abbr], start_hour)
 
 
-def greedy_schedule(professors, classrooms, timetable):
+def greedy_schedule(professors, classrooms, timetable, elective_slots=None):
+
     used_time_slots = set()
+
+    if elective_slots is None:
+        elective_slots = set()
+
     for professor in professors:
 
         available_slots = sorted(professor.available_times, key=sort_key)
@@ -23,6 +28,8 @@ def greedy_schedule(professors, classrooms, timetable):
             for slot in available_slots:
                 day, time_slot = slot.split(" ")
 
+                if (day, time_slot) in elective_slots:
+                    continue  # skip slots used by electives
                 if (day, time_slot) in used_time_slots:
                     continue
                 if not professor.is_available(slot):
@@ -64,6 +71,8 @@ def greedy_schedule(professors, classrooms, timetable):
 
                 for day in days:
                     for time_slot in time_slots:
+                        if (day, time_slot) in elective_slots:
+                            continue
                         if (day, time_slot) in used_time_slots:
                             continue
 

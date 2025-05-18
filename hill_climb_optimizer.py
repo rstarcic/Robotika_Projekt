@@ -7,23 +7,30 @@ from classes import Classroom, Professor
 # Smanjiti broj predavanja u danu?
 # Da se sto vise predavanja stavi u istu predavaonu?
 # Ako se radi podjela predavanja/vjezbe - staviti da prvo idu predavanja pa vjezbe (vjezbe prate predavanja?) done
-def score_timetable(timetable, classrooms, professors):
+def score_timetable(timetable, classrooms, professors, elective_slots=None):
+    if elective_slots is None:
+        elective_slots = set()
     score = 0
     penalties = 0
-
     subject_slots = {}
-
     for classroom in classrooms:
         for (day, time_slot), (professor, subject) in classroom.schedule.items():
             if professor and subject:
                 key = (subject.name, subject.type)
                 subject_slots[key] = (day, time_slot, professor, subject)
 
+                if (day, time_slot) in elective_slots and not subject.is_elective:
+                    penalties += 30
+                else:
+                    score += 20
+
     for (name, type_), (day, slot, professor, subject) in subject_slots.items():
         slot_str = f"{day} {slot}"
 
         if slot_str not in professor.available_times:
-            penalties += 15
+            penalties += 25
+        else:
+            score += 15
 
     for (name, type_), (ex_day, ex_slot, ex_prof, ex_subject) in subject_slots.items():
         if ex_subject.type == "Vježbe":
@@ -54,7 +61,7 @@ def clone_classrooms(classrooms):
         new_classroom.schedule = {
             (day, time_slot): (
                 Professor(p.name, p.available_times[:], list(p.subjects)),
-                subj,  # defintitvno debugirati
+                subj,
             )
             for (day, time_slot), (p, subj) in c.schedule.items()
         }
@@ -83,11 +90,16 @@ def clone_timetable(classrooms):
     return timetable
 
 
-def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
+def hill_climb(
+    initial_timetable, classrooms, professors, elective_slots=None, max_iterations=1000
+):
     current_classrooms = clone_classrooms(classrooms)
     current_timetable = clone_timetable(current_classrooms)
     current_score = score_timetable(current_timetable, current_classrooms, professors)
     print("Original timetable score:", current_score)
+
+    if elective_slots is None:
+        elective_slots = set()
 
     for _ in range(max_iterations):
         improved = False
@@ -138,6 +150,9 @@ def hill_climb(initial_timetable, classrooms, professors, max_iterations=1000):
                     new_day = days[day_i]
                     new_slot = time_slots[slot_i]
                     new_slot_str = f"{new_day} {new_slot}"
+
+                    if (new_day, new_slot) in elective_slots:
+                        continue
 
                     for classroom in current_classrooms:
 

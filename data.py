@@ -56,8 +56,8 @@ subjects = [
     Subject("Napredni algoritmi i strukture podataka", "Vježbe", [5]),  # 40
     Subject("Razvoj IT rješenja", "Predavanje", [5]),  # 41
     # IZBORNI
-    Subject("Stručna praksa prijediplomski", "Praksa", [3], is_elective=True),  # 42
-    Subject("Stručna praksa diplomski", "Praksa", [4, 5], is_elective=True),  # 43
+    Subject("Stručna praksa prijediplomski", "Predavanje", [3], is_elective=True),  # 42
+    Subject("Stručna praksa diplomski", "Predavanje", [4, 5], is_elective=True),  # 43
     Subject("Upravljanje projektima", "Predavanje", [4, 5], is_elective=True),  # 44
     Subject("Upravljanje projektima", "Vježbe", [4, 5], is_elective=True),  # 45
     Subject(
