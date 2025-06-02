@@ -7,9 +7,10 @@ from classes import Classroom, Professor
 # Smanjiti broj predavanja u danu?
 # Da se sto vise predavanja stavi u istu predavaonu?
 # Ako se radi podjela predavanja/vjezbe - staviti da prvo idu predavanja pa vjezbe (vjezbe prate predavanja?) done
-def score_timetable(timetable, classrooms, professors, elective_slots=None):
+def score_timetable(timetable, classrooms, professors, elective_slots):
     if elective_slots is None:
         elective_slots = set()
+        print("bla", elective_slots)
     score = 0
     penalties = 0
     subject_slots = {}
@@ -19,18 +20,22 @@ def score_timetable(timetable, classrooms, professors, elective_slots=None):
                 key = (subject.name, subject.type)
                 subject_slots[key] = (day, time_slot, professor, subject)
 
-                if (day, time_slot) in elective_slots and not subject.is_elective:
-                    penalties += 30
+                if (day, time_slot) in elective_slots:
+                    print("bla", elective_slots)
+                    if not subject.is_elective:
+                        penalties += 1000  # Zabranjeno za obavezne
+                    else:
+                        score += 40  # Izborni u svom slotu – OK
                 else:
-                    score += 20
+                    score += 40  # Sve ostalo normalno boduj
 
     for (name, type_), (day, slot, professor, subject) in subject_slots.items():
         slot_str = f"{day} {slot}"
 
         if slot_str not in professor.available_times:
-            penalties += 25
+            penalties += 20
         else:
-            score += 15
+            score += 10
 
     for (name, type_), (ex_day, ex_slot, ex_prof, ex_subject) in subject_slots.items():
         if ex_subject.type == "Vježbe":
@@ -42,14 +47,39 @@ def score_timetable(timetable, classrooms, professors, elective_slots=None):
                 ex_index = (days.index(ex_day), time_slots.index(ex_slot))
 
                 if ex_index > lec_index:
-                    score += 10  # Reward: vježbe come after predavanje
+                    score += 50  # Reward: vježbe come after predavanje
                 else:
-                    penalties += 15  # Penalty: bad order
+                    penalties += 40  # Penalty: bad order
 
                 # Extra penalty if professor not available for vježbe
                 ex_slot_str = f"{ex_day} {ex_slot}"
                 if ex_slot_str not in ex_prof.available_times:
                     penalties += 5
+
+    day_counts = {day: 0 for day in days}
+    for (name, type_), (day, slot, professor, subject) in subject_slots.items():
+        day_counts[day] += 1
+    for day, count in day_counts.items():
+        if count == 0:
+            penalties += 5  # blaga kazna za prazan dan
+        elif count == 1:
+            score += 3  # ok, samo jedno predavanje
+        elif count == 2:
+            score += 6  # optimalno
+        elif count == 3:
+            score += 2  # još ok
+        else:
+            penalties += (count - 2) * 100  # jako penaliziraj pretrpane dane
+
+    for (name, type_), (day, slot, professor, subject) in subject_slots.items():
+        if slot == "8-10":
+            score += 5
+        elif slot == "10-12":
+            score += 3
+        elif slot == "14-16":
+            penalties += 2
+        elif slot in ["16-18", "18-20"]:
+            penalties += 4
 
     return score - penalties
 
@@ -95,11 +125,16 @@ def hill_climb(
 ):
     current_classrooms = clone_classrooms(classrooms)
     current_timetable = clone_timetable(current_classrooms)
-    current_score = score_timetable(current_timetable, current_classrooms, professors)
+    current_score = score_timetable(
+        current_timetable, current_classrooms, professors, elective_slots=elective_slots
+    )
     print("Original timetable score:", current_score)
 
     if elective_slots is None:
+        print("Prazni electives")
         elective_slots = set()
+    else:
+        print("LLL", elective_slots)
 
     for _ in range(max_iterations):
         improved = False
@@ -180,7 +215,10 @@ def hill_climb(
 
                         new_timetable = clone_timetable(current_classrooms)
                         new_score = score_timetable(
-                            new_timetable, current_classrooms, professors
+                            new_timetable,
+                            current_classrooms,
+                            professors,
+                            elective_slots=elective_slots,
                         )
 
                         if new_score > best_score:

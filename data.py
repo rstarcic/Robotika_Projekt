@@ -5,6 +5,7 @@ classrooms = [
     Classroom("109", False),
     Classroom("110", True),
     Classroom("132", False),
+    Classroom("133", True),
 ]
 
 subjects = [
@@ -58,23 +59,19 @@ subjects = [
     # IZBORNI
     Subject("Stručna praksa prijediplomski", "Predavanje", [3], is_elective=True),  # 42
     Subject("Stručna praksa diplomski", "Predavanje", [4, 5], is_elective=True),  # 43
-    Subject("Upravljanje projektima", "Predavanje", [4, 5], is_elective=True),  # 44
-    Subject("Upravljanje projektima", "Vježbe", [4, 5], is_elective=True),  # 45
-    Subject(
-        "Geoinformacijski sustavi", "Predavanje", [2, 3, 4], is_elective=True
-    ),  # 46
+    Subject("Upravljanje projektima", "Predavanje", [5], is_elective=True),  # 44
+    Subject("Upravljanje projektima", "Vježbe", [5], is_elective=True),  # 45
+    Subject("Geoinformacijski sustavi", "Predavanje", [2, 4], is_elective=True),  # 46
     Subject("Osnove ekonomije", "Predavanje", [2], is_elective=True),  # 47
-    Subject("Osnove ekonomije", "Predavanje", [2], is_elective=True),  # 48
+    Subject("Osnove ekonomije", "Vježbe", [2], is_elective=True),  # 48
     Subject(
-        "Računovodstvo u virtualnom okruženju", "Predavanje", [4, 5], is_elective=True
+        "Računovodstvo u virtualnom okruženju", "Predavanje", [3], is_elective=True
     ),  # 49
     Subject(
-        "Računovodstvo u virtualnom okruženju", "Vježbe", [4, 5], is_elective=True
+        "Računovodstvo u virtualnom okruženju", "Vježbe", [3], is_elective=True
     ),  # 50
-    Subject(
-        "Sustavi elektroničkog učenja", "Predavanje", [4, 5], is_elective=True
-    ),  # 51
-    Subject("Sustavi elektroničkog učenja", "Vježbe", [4, 5], is_elective=True),  # 52
+    Subject("Sustavi elektroničkog učenja", "Predavanje", [3], is_elective=True),  # 51
+    Subject("Sustavi elektroničkog učenja", "Vježbe", [3], is_elective=True),  # 52
     Subject("Robotika", "Predavanje", [4], is_elective=True),  # 53
     Subject("Robotika", "Vježbe", [4], is_elective=True),  # 54
     Subject("Blockchain aplikacije", "Predavanje", [4], is_elective=True),  # 55
@@ -83,19 +80,17 @@ subjects = [
     Subject(
         "Interakcija čovjeka i računala", "Predavanje", [4], is_elective=True
     ),  # 58
-    Subject("Sustavi elektroničkog učenja", "Predavanje", [4], is_elective=True),  # 59
-    Subject("Sustavi elektroničkog učenja", "Vježbe", [4], is_elective=True),  # 60
 ]
 
 professors = [
     Professor(
         "izv. prof. dr. sc. Valter Boljunčić",
-        ["Mon 10-12", "Wed 10-12"],
+        ["Mon 8-10", "Tue 10-12", "Wed 14-16", "Thu 14-16"],
         [subjects[0], subjects[1]],
     ),
     Professor(
         "doc. dr. sc. Siniša Miličić",
-        ["Wed 8-10", "Thu 10-12"],
+        ["Tue 8-10", "Thu 10-12", "Fri 14-16"],
         [
             subjects[2],
             subjects[8],
@@ -106,22 +101,22 @@ professors = [
     ),
     Professor(
         "mag. edu. math. Tea Šumberac",
-        ["Thu 8-10", "Fri 8-10"],
+        ["Thu 8-10", "Fri 8-10", "Fri 14-16"],
         [subjects[3]],
     ),
     Professor(
         "izv. prof. dr. sc. Darko Etinger",
-        ["Thu 8-10", "Fri 10-12", "Mon 10-12"],
+        ["Mon 8-10", "Wed 10-12", "Thu 8-10", "Thu 10-12", "Fri 10-12"],
         [subjects[4], subjects[6], subjects[25], subjects[27], subjects[58]],
     ),
     Professor(
         "izv. prof. dr. sc. Željka Tomasović",
-        ["Thu 8-10", "Thu 14-16"],
+        ["Tue 10-12", "Thu 8-10", "Thu 14-16"],
         [subjects[5]],
     ),
     Professor(
         "mag. inf. Romeo Šajina",
-        ["Thu 8-10", "Thu 14-16", "Tue 14-16"],
+        ["Thu 8-10", "Thu 14-16", "Fri 8-10"],
         [subjects[7], subjects[13]],
     ),
     Professor(
@@ -131,12 +126,12 @@ professors = [
     ),
     Professor(
         "izv. prof. dr. sc. Snježana Babić",
-        ["Tue 8-10", "Wed 14-16"],
-        [subjects[28], subjects[41], subjects[51], subjects[59], subjects[60]],
+        ["Wed 10-12", "Thu 10-12", "Fri 14-16"],
+        [subjects[28], subjects[41], subjects[51]],
     ),
     Professor(
         "doc. dr. sc. Ivan Lorencin",
-        ["Tue 14-16", "Fri 10-12"],
+        ["Mon 8-10", "Mon 14-16", "Wed 14-16", "Thu 10-12"],
         [
             subjects[9],
             subjects[14],
@@ -148,7 +143,7 @@ professors = [
     ),
     Professor(
         "doc. dr. sc. Goran Oreški",
-        ["Mon 14-16", "Wed 10-12"],
+        ["Mon 10-12", "Tue 10-12", "Wed 14-16", "Thu 8-10"],
         [subjects[12]],
     ),
     Professor(
@@ -161,7 +156,7 @@ professors = [
     ),
     Professor(
         "dr. sc. Darko Brborović",
-        ["Mon 10-12", "Wed 8-10"],
+        ["Mon 8-10", "Wed 14-16", "Fri 8-10", "Tue 8-10"],
         [
             subjects[16],
             subjects[17],
@@ -171,7 +166,7 @@ professors = [
     ),
     Professor(
         "izv. prof. dr. sc. Tihomir Orehovački",
-        ["Mon 10-12", "Wed 8-10"],
+        ["Mon 10-12", "Wed 8-10", "Thu 14-16"],
         [
             subjects[10],
             subjects[18],
@@ -193,7 +188,7 @@ professors = [
     ),
     Professor(
         "doc. dr. sc. Nikola Tanković",
-        ["Mon 10-12", "Wed 8-10"],
+        ["Mon 10-12", "Thu 8-10", "Wed 8-10"],
         [
             subjects[23],
             subjects[24],
@@ -221,22 +216,22 @@ professors = [
     ),
     Professor(
         "dipl. ing. Gordan Krčelić",
-        ["Mon 10-12", "Wed 8-10"],
+        ["Mon 10-12", "Fri 8-10", "Fri 10-12", "Fri 16-18"],
         [subjects[44], subjects[45]],
     ),
     Professor(
         "dr. sc. Boris Blagonić",
-        ["Mon 10-12", "Wed 8-10"],
+        ["Mon 10-12", "Wed 10-12"],
         [subjects[46]],
     ),
     Professor(
         "izv. prof. dr. sc. Dean Sinković",
-        ["Mon 10-12", "Wed 8-10"],
+        ["Mon 14-16", "Tue 8-10"],
         [subjects[47], subjects[48]],
     ),
     Professor(
         "prof. dr. sc. Robert Zenzerović",
-        ["Mon 10-12", "Wed 8-10"],
+        ["Mon 10-12", "Mon 14-16", "Wed 10-12", "Fri 10-12", "Fri 14-16"],
         [
             subjects[49],
             subjects[50],

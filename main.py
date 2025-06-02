@@ -13,7 +13,11 @@ from data import (
 from greedy_scheduler import greedy_schedule
 from hill_climb_optimizer import hill_climb
 from display import display_timetable
-from html_and_csv_export import generate_html_single_table
+from html_and_csv_export import (
+    generate_html_single_table,
+    save_timetable_to_csv,
+    convert_csv_to_xlsx,
+)
 from elective_scheduler import schedule_electives
 
 
@@ -70,6 +74,31 @@ def main():
         ) as f:
             f.write(html_optimized)
         print(f"Generiran HTML: {year}_godina_optimized_timetable.html")
+
+        save_timetable_to_csv(
+            timetables[year - 1],
+            classrooms,
+            year,
+            f"{year}_godina_timetable_matrix.csv",
+        )
+
+        save_timetable_to_csv(
+            optimized_timetable,
+            classrooms,
+            year,
+            f"{year}_godina_optimized_timetable_matrix.csv",
+        )
+
+        # Konverzija CSV → XLSX
+        convert_csv_to_xlsx(
+            f"{year}_godina_timetable_matrix.csv",
+            f"{year}_godina_timetable_matrix.xlsx",
+        )
+
+        convert_csv_to_xlsx(
+            f"{year}_godina_optimized_timetable_matrix.csv",
+            f"{year}_godina_optimized_timetable_matrix.xlsx",
+        )
 
 
 if __name__ == "__main__":

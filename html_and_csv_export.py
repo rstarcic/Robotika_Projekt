@@ -1,4 +1,7 @@
 from data import days, time_slots
+import csv
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side
 
 
 def clean_professor_name(full_name):
@@ -244,3 +247,59 @@ def generate_html_single_table(
 """
 
     return html
+
+
+def save_timetable_to_csv(timetable, classrooms, year_number, filename):
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write("Godina,Dan,Vrijeme,Predmet,Tip,Profesor,Učionica\n")
+        for classroom in classrooms:
+            for day in timetable[classroom.name]:
+                for time_slot in timetable[classroom.name][day]:
+                    entry = timetable[classroom.name][day][time_slot]
+                    if entry:
+                        line = (
+                            f"{year_number},"
+                            f"{day},"
+                            f"{time_slot},"
+                            f"{entry['subject']},"
+                            f"{entry['subject_type']},"
+                            f"{entry['professor']},"
+                            f"{classroom.name}\n"
+                        )
+                        f.write(line)
+
+
+def convert_csv_to_xlsx(csv_filename, xlsx_filename):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Raspored"
+
+    # Stilovi
+    bold_font = Font(bold=True)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    thin_border = Border(
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thin"),
+    )
+
+    # Učitaj CSV
+    with open(csv_filename, newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        for row_index, row in enumerate(reader, start=1):
+            for col_index, cell in enumerate(row, start=1):
+                c = ws.cell(row=row_index, column=col_index, value=cell)
+                c.alignment = center_align
+                c.border = thin_border
+                if row_index == 1:  # header
+                    c.font = bold_font
+
+    # Automatska širina stupaca
+    for column_cells in ws.columns:
+        length = max(len(str(cell.value)) if cell.value else 0 for cell in column_cells)
+        adjusted_width = length + 2
+        ws.column_dimensions[column_cells[0].column_letter].width = adjusted_width
+
+    wb.save(xlsx_filename)
+    print(f"Generiran .xlsx: {xlsx_filename}")
