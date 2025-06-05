@@ -42,10 +42,7 @@ def greedy_schedule(professors, classrooms, timetable, elective_slots=None):
                                 continue
                             if subject.type == "Predavanje" and classroom.is_lab:
                                 continue
-                        if subject.name == "Razvoj IT rješenja":
-                            print(
-                                f"-------------> Scheduled {subject.name} with {professor.name} in {classroom.name} on {slot}"
-                            )
+
                             timetable[classroom.name][day][time_slot] = {
                                 "professor": professor.name,
                                 "classroom": classroom.name,
@@ -54,7 +51,7 @@ def greedy_schedule(professors, classrooms, timetable, elective_slots=None):
                             }
                             classroom.schedule_lecture(
                                 professor, day, time_slot, subject
-                            )  # treba debugirati
+                            )
                             professor.schedule_lecture(slot)
                             subject.scheduled = True
                             used_time_slots.add((day, time_slot))

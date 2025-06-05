@@ -21,7 +21,6 @@ def score_timetable(timetable, classrooms, professors, elective_slots):
                 subject_slots[key] = (day, time_slot, professor, subject)
 
                 if (day, time_slot) in elective_slots:
-                    print("bla", elective_slots)
                     if not subject.is_elective:
                         penalties += 1000  # Zabranjeno za obavezne
                     else:
@@ -51,7 +50,6 @@ def score_timetable(timetable, classrooms, professors, elective_slots):
                 else:
                     penalties += 40  # Penalty: bad order
 
-                # Extra penalty if professor not available for vježbe
                 ex_slot_str = f"{ex_day} {ex_slot}"
                 if ex_slot_str not in ex_prof.available_times:
                     penalties += 5
